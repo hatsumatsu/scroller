@@ -69,7 +69,7 @@ export default class Scroller {
     this.delta = 0;
 
     this.scrollPosition = 0;
-    this.previousScrollPositionPosition = 0;
+    this.previousScrollPosition = 0;
     this.targetScrollPosition = 0;
 
     this.scrollProgress = 0;
@@ -92,8 +92,9 @@ export default class Scroller {
     this.bindEvents();
 
     if (this.options.loop) {
-      this.scrollPosition = 0;
+      this.scrollPosition = 1;
       this.targetScrollPosition = 1;
+      this.previousScrollPosition =1;
     }
 
     this.onResize();
@@ -253,8 +254,15 @@ export default class Scroller {
    * @param {float} scrollPosition
    */
   setOption(key, value, update = true) {
+    // validate
+    if( key === 'scrollPositionMax') {
+      value = clamp( value, this.options.loop ? 1 : 0, Infinity );
+    }
+
+    // set value
     this.options[key] = value;
 
+    // implications
     if (key === 'direction') {
       if (this.elements.scrollBar) {
         this.elements.scrollBar.setAttribute(
@@ -263,6 +271,8 @@ export default class Scroller {
         );
       }
     }
+
+    
 
     this.onResize();
 
