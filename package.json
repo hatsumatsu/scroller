@@ -4,7 +4,7 @@
   "description": "Virtual Scroll",
   "main": "scroller.js",
   "scripts": {},
-  "repository": "hatsumatsu/scroller"
+  "repository": "hatsumatsu/scroller",
   "author": "",
   "license": "MIT"
 }
