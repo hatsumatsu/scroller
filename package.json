@@ -1,0 +1,10 @@
+{
+  "name": "@superstructure.net/scroller",
+  "version": "0.0.1",
+  "description": "Virtual Scroll",
+  "main": "scroller.js",
+  "scripts": {},
+  "repository": "hatsumatsu/scroller"
+  "author": "",
+  "license": "MIT"
+}
