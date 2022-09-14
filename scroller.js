@@ -417,9 +417,11 @@ export default class Scroller {
     }
 
     if (this.options.direction === "y") {
+      this.elements.scrollBar.style.width = ``;
       this.elements.scrollBar.style.height = this.scrollBar.size + "px";
     } else {
       this.elements.scrollBar.style.width = this.scrollBar.size + "px";
+      this.elements.scrollBar.style.height = ``;
     }
   }
 
