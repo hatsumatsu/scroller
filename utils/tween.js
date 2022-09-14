@@ -1,13 +1,13 @@
-import { easing } from './Utils';
+import { easing } from "./Utils";
 
 export default class Tween {
   constructor(options) {
     this.defaults = {
       duration: 1000,
-      easing: 'linear',
+      easing: "linear",
 
       onUpdate: () => {},
-      onCompleted: () => {}
+      onCompleted: () => {},
     };
     this.options = Object.assign({}, this.defaults, options);
 
@@ -27,7 +27,7 @@ export default class Tween {
   }
 
   start(startValue, targetValue) {
-    console.log('Tween.start()', startValue, targetValue);
+    console.log("Tween.start()", startValue, targetValue);
 
     this.value = startValue;
     this.startValue = startValue;
@@ -47,7 +47,7 @@ export default class Tween {
   }
 
   stop(finish = false) {
-    console.log('Tween.stop()', finish);
+    console.log("Tween.stop()", finish);
 
     this.isRunning = false;
 

@@ -53,7 +53,7 @@ const easing = {
   outQuint: (t) => 1 + --t * t * t * t * t,
   // acceleration until halfway, then deceleration
   inOutQuint: (t) =>
-    t < 0.5 ? 16 * t * t * t * t * t : 1 + 16 * --t * t * t * t * t
+    t < 0.5 ? 16 * t * t * t * t * t : 1 + 16 * --t * t * t * t * t,
 };
 
 export { lerp, clamp, range, easing };

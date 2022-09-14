@@ -4,37 +4,41 @@
  *
  * once this is fixed we can make touchstart, touchmove and touchend passive again without calling event.preventDefault();
  */
-import Tween from './utils/tween';
-import Inertia from './utils/inertia';
-import { clamp } from './utils/utils';
+import Tween from "./utils/tween";
+import Inertia from "./utils/inertia";
+import { clamp } from "./utils/utils";
 
 export default class Scroller {
   constructor(options = {}) {
-    console.log('new Scroller()');
+    console.log("new Scroller()");
 
     this.defaults = {
       active: true,
 
-      direction: 'y',
+      direction: "y",
 
       loop: false,
 
       scrollPositionMax: Infinity,
 
+      scrollToEasing: "outQuart",
+
       scrollFactor: {
         touch: 1,
-        wheel: 1
+        wheel: 1,
       },
 
       keyboard: {
-        distance: 0.25 // fraction of scrollerSize
+        distance: 0.25, // fraction of scrollerSize
       },
 
       scrollBar: {
-        minSize: 40
+        minSize: 40,
       },
 
-      onScroll: () => {}
+      onScroll: () => {},
+
+      bindResize: true,
     };
 
     this.options = Object.assign({}, this.defaults, options);
@@ -46,25 +50,25 @@ export default class Scroller {
     this.is = {
       initiated: false,
       active: false,
-      scrollbaring: false
+      scrollbaring: false,
     };
 
     this.scrollerSize = 0; // either window.innerHeight or window.innerWidth depending on this.options.direction
 
-    this.mode = 'touch';
+    this.mode = undefined;
 
     this.touchPosition = {
       current: 0,
-      previous: 0
+      previous: 0,
     };
 
     this.mousePosition = {
       current: 0,
-      previous: 0
+      previous: 0,
     };
 
     this.touchInertia = new Inertia();
-    this.scrollToTween = new Tween({ easing: 'outQuart' });
+    this.scrollToTween = new Tween({ easing: this.options.scrollToEasing });
 
     this.delta = 0;
 
@@ -75,32 +79,32 @@ export default class Scroller {
     this.scrollProgress = 0;
 
     this.scrollBar = {
-      size: 0
+      size: 0,
     };
 
     this.debouncer = {
       resize: null,
-      wheel: null
+      wheel: null,
     };
 
     this.init();
   }
 
   init() {
-    this.build();
+    this.buildScrollbar();
 
     this.bindEvents();
 
     if (this.options.loop) {
       this.scrollPosition = 1;
       this.targetScrollPosition = 1;
-      this.previousScrollPosition =1;
+      this.previousScrollPosition = 1;
     }
 
-    this.onResize();
+    this.resize();
 
     this.is.initiated = true;
-    document.documentElement.setAttribute('data-Scroller-initiated', true);
+    document.documentElement.setAttribute("data-Scroller-initiated", true);
 
     if (this.options.active) {
       this.activate();
@@ -109,18 +113,18 @@ export default class Scroller {
     }
   }
 
-  build() {
+  buildScrollbar() {
     // scrollBar
-    this.elements.scrollBar = document.createElement('div');
-    this.elements.scrollBar.setAttribute('data-scroller-role', 'scrollBar');
+    this.elements.scrollBar = document.createElement("div");
+    this.elements.scrollBar.setAttribute("data-scroller-role", "scrollBar");
     this.elements.scrollBar.setAttribute(
-      'data-scroller-direction',
+      "data-scroller-direction",
       this.options.direction
     );
     document.body.appendChild(this.elements.scrollBar);
   }
 
-  unbuild() {
+  destroyScrollbar() {
     if (this.elements.scrollBar) {
       this.elements.scrollBar.remove();
     }
@@ -133,31 +137,72 @@ export default class Scroller {
       return;
     }
 
-    if (this.options.direction === 'y') {
+    if (this.options.direction === "y") {
       this.elements.scrollBar.style.transform =
-        'translateY( ' +
+        "translateY( " +
         (this.scrollPosition / this.options.scrollPositionMax) *
           (this.scrollerSize - this.scrollBar.size) +
-        'px )';
+        "px )";
     } else {
       this.elements.scrollBar.style.transform =
-        'translateX( ' +
+        "translateX( " +
         (this.scrollPosition / this.options.scrollPositionMax) *
           (this.scrollerSize - this.scrollBar.size) +
-        'px )';
+        "px )";
     }
   }
 
   showScrollBar() {
-    this.elements.scrollBar.classList.remove('hidden');
+    this.elements.scrollBar.classList.remove("hidden");
   }
 
   hideScrollBar() {
-    this.elements.scrollBar.classList.add('hidden');
+    this.elements.scrollBar.classList.add("hidden");
+  }
+
+  /**
+   * Public method
+   * @param {float} scrollPosition
+   */
+  activate() {
+    this.is.active = true;
+
+    this.showScrollBar();
+    this.onFrame();
+  }
+
+  /**
+   * Public method
+   * @param {float} scrollPosition
+   */
+  deactivate() {
+    this.is.active = false;
+
+    this.hideScrollBar();
+    cancelAnimationFrame(this.frame);
+  }
+
+  /**
+   * Public method
+   * @param {float} scrollPosition
+   */
+  scrollTo(scrollPosition, animate = false) {
+    if (scrollPosition === undefined) {
+      return;
+    }
+
+    if (this.scrollToTween.getIsRunning()) {
+      this.scrollToTween.stop();
+    }
+
+    if (!animate) {
+      this.targetScrollPosition = scrollPosition;
+    } else {
+      this.scrollToTween.start(this.scrollPosition, scrollPosition);
+    }
   }
 
   setScrollPosition(scrollPosition, update = true) {
-
     this.previousScrollPosition = this.scrollPosition;
     this.scrollPosition = clamp(
       scrollPosition,
@@ -203,48 +248,6 @@ export default class Scroller {
    * Public method
    * @param {float} scrollPosition
    */
-  activate() {
-    this.is.active = true;
-
-    this.showScrollBar();
-    this.onFrame();
-  }
-
-  /**
-   * Public method
-   * @param {float} scrollPosition
-   */
-  deactivate() {
-    this.is.active = false;
-
-    this.hideScrollBar();
-    cancelAnimationFrame(this.frame);
-  }
-
-  /**
-   * Public method
-   * @param {float} scrollPosition
-   */
-  scrollTo(scrollPosition, animate = false) {
-    if (scrollPosition === undefined) {
-      return;
-    }
-
-    if (this.scrollToTween.getIsRunning()) {
-      this.scrollToTween.stop();
-    }
-
-    if (!animate) {
-      this.targetScrollPosition = scrollPosition;
-    } else {
-      this.scrollToTween.start(this.scrollPosition, scrollPosition);
-    }
-  }
-
-  /**
-   * Public method
-   * @param {float} scrollPosition
-   */
   getOption(key) {
     return this.options?.[key] || undefined;
   }
@@ -255,26 +258,24 @@ export default class Scroller {
    */
   setOption(key, value, update = true) {
     // validate
-    if( key === 'scrollPositionMax') {
-      value = clamp( value, this.options.loop ? 1 : 0, Infinity );
+    if (key === "scrollPositionMax") {
+      value = clamp(value, this.options.loop ? 1 : 0, Infinity);
     }
 
     // set value
     this.options[key] = value;
 
     // implications
-    if (key === 'direction') {
+    if (key === "direction") {
       if (this.elements.scrollBar) {
         this.elements.scrollBar.setAttribute(
-          'data-scroller-direction',
+          "data-scroller-direction",
           this.options.direction
         );
       }
     }
 
-    
-
-    this.onResize();
+    this.resize();
 
     this.updateScrollBar();
   }
@@ -284,7 +285,7 @@ export default class Scroller {
    * @param {float} scrollPosition
    */
   destroy() {
-    console.log('Scroller.destroy()');
+    console.log("Scroller.destroy()");
 
     // INERTIA
     if (this.touchInertia) {
@@ -296,85 +297,89 @@ export default class Scroller {
     }
 
     // RESIZE
-    window.removeEventListener('resize', this.onWindowResize);
+    if (this.options.bindResize) {
+      window.removeEventListener("resize", this.onWindowResize);
+    }
 
     // KEYBOARD
-    document.removeEventListener('keydown', this.onKeyDown);
+    document.removeEventListener("keydown", this.onKeyDown);
 
     // MOUSEWHEEL
-    document.removeEventListener('wheel', this.onWheel, { passive: true });
+    document.removeEventListener("wheel", this.onWheel, { passive: true });
 
     // MOUSE
     if (this.elements.scrollBar) {
       this.elements.scrollBar.removeEventListener(
-        'mousedown',
+        "mousedown",
         this.onMouseDown
       );
     }
-    document.removeEventListener('mousemove', this.onMouseMove);
-    document.removeEventListener('mouseup', this.onMouseUp);
+    document.removeEventListener("mousemove", this.onMouseMove);
+    document.removeEventListener("mouseup", this.onMouseUp);
 
     // TOUCH
-    document.removeEventListener('touchstart', this.onTouchStart, {
-      passive: true
+    document.removeEventListener("touchstart", this.onTouchStart, {
+      passive: true,
     });
-    document.removeEventListener('touchmove', this.onTouchMove, {
-      passive: false
+    document.removeEventListener("touchmove", this.onTouchMove, {
+      passive: false,
     });
-    document.removeEventListener('touchend', this.onTouchEnd, {
-      passive: true
+    document.removeEventListener("touchend", this.onTouchEnd, {
+      passive: true,
     });
-    document.removeEventListener('touchcancel', this.onTouchEnd, {
-      passive: true
+    document.removeEventListener("touchcancel", this.onTouchEnd, {
+      passive: true,
     });
 
     // ELEMENTS
-    this.unbuild();
+    this.destroyScrollbar();
 
     // STATE
-    document.documentElement.setAttribute('data-Scroller-initiated', false);
+    document.documentElement.setAttribute("data-Scroller-initiated", false);
     this.is.initiated = false;
   }
 
   bindEvents() {
-    console.log('bindEvents()');
+    console.log("bindEvents()");
 
     // RESIZE
     this.onWindowResize = this.onWindowResize.bind(this);
-    window.addEventListener('resize', this.onWindowResize);
+    if (this.options.bindResize) {
+      window.addEventListener("resize", this.onWindowResize);
+    }
 
     // KEYBOARD
     this.onKeyDown = this.onKeyDown.bind(this);
-    document.addEventListener('keydown', this.onKeyDown);
+    document.addEventListener("keydown", this.onKeyDown);
 
     // MOUSEWHEEL
 
     this.onWheel = this.onWheel.bind(this);
-    document.addEventListener('wheel', this.onWheel, { passive: true });
+    document.addEventListener("wheel", this.onWheel, { passive: true });
 
     // MOUSE
     this.onMouseDown = this.onMouseDown.bind(this);
     this.onMouseMove = this.onMouseMove.bind(this);
     this.onMouseUp = this.onMouseUp.bind(this);
     if (this.elements.scrollBar) {
-      this.elements.scrollBar.addEventListener('mousedown', this.onMouseDown);
+      this.elements.scrollBar.addEventListener("mousedown", this.onMouseDown);
     }
-    document.addEventListener('mousemove', this.onMouseMove);
-    document.addEventListener('mouseup', this.onMouseUp);
+    document.addEventListener("mousemove", this.onMouseMove);
+    document.addEventListener("mouseup", this.onMouseUp);
 
     // TOUCH
     this.onTouchStart = this.onTouchStart.bind(this);
     this.onTouchMove = this.onTouchMove.bind(this);
     this.onTouchEnd = this.onTouchEnd.bind(this);
-    document.addEventListener('touchstart', this.onTouchStart, {
-      passive: true
+    document.addEventListener("touchstart", this.onTouchStart, {
+      passive: true,
     });
-    document.addEventListener('touchmove', this.onTouchMove, {
-      passive: false
+    document.addEventListener("touchmove", this.onTouchMove, {
+      passive: false,
     });
-    document.addEventListener('touchend', this.onTouchEnd, { passive: true });
-    document.addEventListener('touchcancel', this.onTouchEnd, {
-      passive: true
+    document.addEventListener("touchend", this.onTouchEnd, { passive: true });
+    document.addEventListener("touchcancel", this.onTouchEnd, {
+      passive: true,
     });
   }
 
@@ -387,15 +392,15 @@ export default class Scroller {
     clearTimeout(this.debouncer.resize);
 
     this.debouncer.resize = setTimeout(() => {
-      this.onResize();
+      this.resize();
     }, 500);
   }
 
-  onResize() {
-    console.log('Scroller.onResize()');
+  resize() {
+    console.log("Scroller.resize()");
 
     this.scrollerSize =
-      this.options.direction === 'y' ? window.innerHeight : window.innerWidth;
+      this.options.direction === "y" ? window.innerHeight : window.innerWidth;
 
     // modify the scrollbar size to allow scrolling in small virtual viewports
     if (this.options.scrollPositionMax) {
@@ -411,10 +416,10 @@ export default class Scroller {
       this.scrollBar.size = 0;
     }
 
-    if (this.options.direction === 'y') {
-      this.elements.scrollBar.style.height = this.scrollBar.size + 'px';
+    if (this.options.direction === "y") {
+      this.elements.scrollBar.style.height = this.scrollBar.size + "px";
     } else {
-      this.elements.scrollBar.style.width = this.scrollBar.size + 'px';
+      this.elements.scrollBar.style.width = this.scrollBar.size + "px";
     }
   }
 
@@ -426,7 +431,7 @@ export default class Scroller {
       return;
     }
 
-    if (event.target.matches('input') || event.target.matches('textarea')) {
+    if (event.target.matches("input") || event.target.matches("textarea")) {
       return;
     }
 
@@ -455,10 +460,10 @@ export default class Scroller {
 
     this.scrollToTween.stop();
 
-    this.mode = 'wheel';
+    this.mode = "wheel";
 
     this.delta =
-      1 * (this.options.direction === 'y' ? event.deltaY : event.deltaX);
+      1 * (this.options.direction === "y" ? event.deltaY : event.deltaX);
 
     clearTimeout(this.debouncer.wheel);
     this.debouncer.wheel = setTimeout(() => {
@@ -481,20 +486,20 @@ export default class Scroller {
     // No preventDefault since the event is passive
     // event.preventDefault();
 
-    console.log('Scroller.onTouchStart()');
+    console.log("Scroller.onTouchStart()");
 
-    this.mode = 'touch';
+    this.mode = "touch";
 
     this.touchInertia.deactivate();
     this.scrollToTween.stop();
 
     this.touchPosition.previous =
-      this.options.direction === 'y'
+      this.options.direction === "y"
         ? event.touches[0].clientY
         : event.touches[0].clientX;
 
     this.touchPosition.current =
-      this.options.direction === 'y'
+      this.options.direction === "y"
         ? event.touches[0].clientY
         : event.touches[0].clientX;
   }
@@ -505,7 +510,7 @@ export default class Scroller {
     }
 
     console.log(
-      'Scroller.onTouchMove()',
+      "Scroller.onTouchMove()",
       this.touchPosition.current - this.touchPosition.previous
     );
 
@@ -518,7 +523,7 @@ export default class Scroller {
     this.touchPosition.previous = this.touchPosition.current;
 
     this.touchPosition.current =
-      this.options.direction === 'y'
+      this.options.direction === "y"
         ? event.touches[0].clientY
         : event.touches[0].clientX;
 
@@ -534,7 +539,7 @@ export default class Scroller {
       return;
     }
 
-    console.log('Scroller.onTouchEnd()', this.lerpFactor, event);
+    console.log("Scroller.onTouchEnd()", this.lerpFactor, event);
 
     // No preventDefault since the event is passive
     // event.preventDefault();
@@ -556,14 +561,14 @@ export default class Scroller {
     this.is.scrollbaring = true;
 
     this.mousePosition.current =
-      this.options.direction === 'y' ? event.clientY : event.clientX;
+      this.options.direction === "y" ? event.clientY : event.clientX;
 
     this.mousePosition.previous =
-      this.options.direction === 'y' ? event.clientY : event.clientX;
+      this.options.direction === "y" ? event.clientY : event.clientX;
 
-    console.log('Scroller.onMouseDown()', this.mousePosition);
+    console.log("Scroller.onMouseDown()", this.mousePosition);
 
-    this.elements.scrollBar.classList.add('active');
+    this.elements.scrollBar.classList.add("active");
   }
 
   onMouseMove(event) {
@@ -578,7 +583,7 @@ export default class Scroller {
     this.mousePosition.previous = this.mousePosition.current;
 
     this.mousePosition.current =
-      this.options.direction === 'y' ? event.clientY : event.clientX;
+      this.options.direction === "y" ? event.clientY : event.clientX;
 
     const distance = this.mousePosition.current - this.mousePosition.previous;
 
@@ -586,7 +591,7 @@ export default class Scroller {
       (distance / (this.scrollerSize - this.scrollBar.size)) *
       this.options.scrollPositionMax;
 
-    console.log('Scroller.onMouseMove()', this.delta);
+    console.log("Scroller.onMouseMove()", this.delta);
   }
 
   onMouseUp(event) {
@@ -598,16 +603,16 @@ export default class Scroller {
       return;
     }
 
-    console.log('Scroller.onMouseUp()');
+    console.log("Scroller.onMouseUp()");
 
     this.mousePosition.current =
-      this.options.direction === 'y' ? event.clientY : event.clientX;
+      this.options.direction === "y" ? event.clientY : event.clientX;
 
     this.delta = 0;
 
     this.is.scrollbaring = false;
 
-    this.elements.scrollBar.classList.remove('active');
+    this.elements.scrollBar.classList.remove("active");
   }
 
   /**
@@ -629,7 +634,7 @@ export default class Scroller {
           : this.scrollToTween.getIsRunning()
           ? this.scrollToTween.getDelta()
           : this.delta) *
-          this.options.scrollFactor[this.mode],
+          (this.options.scrollFactor?.[this.mode] || 1),
       0,
       this.options.scrollPositionMax
     );
