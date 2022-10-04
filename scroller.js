@@ -70,6 +70,7 @@ export default class Scroller {
     this.touchInertia = new Inertia();
     this.scrollToTween = new Tween({ easing: this.options.scrollToEasing });
 
+    // aggregated delta from input events that are not synced to frame rate
     this.delta = 0;
 
     this.scrollPosition = 0;
@@ -404,12 +405,10 @@ export default class Scroller {
 
     // modify the scrollbar size to allow scrolling in small virtual viewports
     if (this.options.scrollPositionMax) {
-      this.scrollBar.size = Math.min(
-        Math.max(
-          this.options.scrollBar.minSize,
-          Math.min(1, this.scrollerSize / this.options.scrollPositionMax) *
-            this.scrollerSize
-        ),
+      this.scrollBar.size = clamp(
+        (this.scrollerSize / this.options.scrollPositionMax) *
+          this.scrollerSize,
+        this.options.scrollBar.minSize,
         this.scrollerSize * 0.8
       );
     } else {
@@ -440,15 +439,11 @@ export default class Scroller {
     this.scrollToTween.stop();
 
     if (event.keyCode === 32 || event.keyCode === 40) {
-      this.targetScrollPosition =
-        this.scrollPosition +
-        this.options.keyboard.distance * this.scrollerSize;
+      this.delta += this.options.keyboard.distance * this.scrollerSize;
     }
 
     if (event.keyCode === 38) {
-      this.targetScrollPosition =
-        this.scrollPosition -
-        this.options.keyboard.distance * this.scrollerSize;
+      this.delta += -1 * this.options.keyboard.distance * this.scrollerSize;
     }
   }
 
@@ -464,8 +459,9 @@ export default class Scroller {
 
     this.mode = "wheel";
 
-    this.delta =
-      1 * (this.options.direction === "y" ? event.deltaY : event.deltaX);
+    const delta = this.options.direction === "y" ? event.deltaY : event.deltaX;
+
+    this.delta += 1 * delta;
 
     clearTimeout(this.debouncer.wheel);
     this.debouncer.wheel = setTimeout(() => {
