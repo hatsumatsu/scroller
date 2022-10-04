@@ -1,4 +1,4 @@
-import { lerp } from "./Utils";
+import { lerp } from "./utils";
 
 export default class Inertia {
   constructor() {
