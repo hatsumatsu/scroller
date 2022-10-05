@@ -1,4 +1,4 @@
-import { easing } from "./utils";
+import { easing } from "./utils.js";
 
 export default class Tween {
   constructor(options) {

@@ -4,9 +4,9 @@
  *
  * once this is fixed we can make touchstart, touchmove and touchend passive again without calling event.preventDefault();
  */
-import Tween from "./utils/tween";
-import Inertia from "./utils/inertia";
-import { clamp } from "./utils/utils";
+import Tween from "./utils/tween.js";
+import Inertia from "./utils/inertia.js";
+import { clamp } from "./utils/utils.js";
 
 export default class Scroller {
   constructor(options = {}) {
