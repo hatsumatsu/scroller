@@ -1,8 +1,9 @@
 {
   "name": "@superstructure.net/scroller",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Virtual Scroll",
   "main": "scroller.js",
+  "type": "module",
   "scripts": {},
   "repository": "hatsumatsu/scroller",
   "license": "MIT"
