@@ -27,8 +27,6 @@ export default class Tween {
   }
 
   start(startValue, targetValue) {
-    console.log("Tween.start()", startValue, targetValue);
-
     this.value = startValue;
     this.startValue = startValue;
     this.previousValue = startValue;
@@ -47,8 +45,6 @@ export default class Tween {
   }
 
   stop(finish = false) {
-    console.log("Tween.stop()", finish);
-
     this.isRunning = false;
 
     cancelAnimationFrame(this.frame);

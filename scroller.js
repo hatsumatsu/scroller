@@ -10,8 +10,6 @@ import { clamp } from "./utils/utils.js";
 
 export default class Scroller {
   constructor(options = {}) {
-    console.log("new Scroller()");
-
     this.defaults = {
       active: true,
 
@@ -286,8 +284,6 @@ export default class Scroller {
    * @param {float} scrollPosition
    */
   destroy() {
-    console.log("Scroller.destroy()");
-
     // INERTIA
     if (this.touchInertia) {
       this.touchInertia.destroy();
@@ -341,8 +337,6 @@ export default class Scroller {
   }
 
   bindEvents() {
-    console.log("bindEvents()");
-
     // RESIZE
     this.onWindowResize = this.onWindowResize.bind(this);
     if (this.options.bindResize) {
@@ -398,8 +392,6 @@ export default class Scroller {
   }
 
   resize() {
-    console.log("Scroller.resize()");
-
     this.scrollerSize =
       this.options.direction === "y" ? window.innerHeight : window.innerWidth;
 
@@ -484,8 +476,6 @@ export default class Scroller {
     // No preventDefault since the event is passive
     // event.preventDefault();
 
-    console.log("Scroller.onTouchStart()");
-
     this.mode = "touch";
 
     this.touchInertia.deactivate();
@@ -506,11 +496,6 @@ export default class Scroller {
     if (!this.is.active) {
       return;
     }
-
-    console.log(
-      "Scroller.onTouchMove()",
-      this.touchPosition.current - this.touchPosition.previous
-    );
 
     // preventDefault since the event is NOT passive
     event.preventDefault();
@@ -537,8 +522,6 @@ export default class Scroller {
       return;
     }
 
-    console.log("Scroller.onTouchEnd()", this.lerpFactor, event);
-
     // No preventDefault since the event is passive
     // event.preventDefault();
 
@@ -564,8 +547,6 @@ export default class Scroller {
     this.mousePosition.previous =
       this.options.direction === "y" ? event.clientY : event.clientX;
 
-    console.log("Scroller.onMouseDown()", this.mousePosition);
-
     this.elements.scrollBar.classList.add("active");
   }
 
@@ -588,8 +569,6 @@ export default class Scroller {
     this.delta +=
       (distance / (this.scrollerSize - this.scrollBar.size)) *
       this.options.scrollPositionMax;
-
-    console.log("Scroller.onMouseMove()", this.delta);
   }
 
   onMouseUp(event) {
@@ -600,8 +579,6 @@ export default class Scroller {
     if (!this.is.scrollbaring) {
       return;
     }
-
-    console.log("Scroller.onMouseUp()");
 
     this.mousePosition.current =
       this.options.direction === "y" ? event.clientY : event.clientX;

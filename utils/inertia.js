@@ -12,8 +12,6 @@ export default class Inertia {
   }
 
   activate() {
-    console.log("Inertia.activate()");
-
     if (Math.abs(this.value) < 0.1) {
       return;
     }
@@ -24,8 +22,6 @@ export default class Inertia {
   }
 
   deactivate() {
-    console.log("Inertia.deactivate()");
-
     this.isActive = false;
     this.value = 0;
 
