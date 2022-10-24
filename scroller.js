@@ -26,6 +26,8 @@ export default class Scroller {
         wheel: 1,
       },
 
+      touchInertiaStrength: 0.035,
+
       keyboard: {
         distance: 0.25, // fraction of scrollerSize
       },
@@ -65,7 +67,9 @@ export default class Scroller {
       previous: 0,
     };
 
-    this.touchInertia = new Inertia();
+    this.touchInertia = new Inertia({
+      lerpFactor: this.options.touchInertiaStrength,
+    });
     this.scrollToTween = new Tween({ easing: this.options.scrollToEasing });
 
     // aggregated delta from input events that are not synced to frame rate

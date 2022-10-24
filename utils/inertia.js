@@ -1,18 +1,19 @@
 import { lerp } from "./utils.js";
 
 export default class Inertia {
-  constructor() {
+  constructor(options = {}) {
     this.isActive = false;
 
     this.value = null;
 
-    this.lerpFactor = 0.035;
+    this.lerpFactor = options?.lerpFactor || 0.035;
+    this.precision = options?.precision || 0.1;
 
     this.frame = null;
   }
 
   activate() {
-    if (Math.abs(this.value) < 0.1) {
+    if (Math.abs(this.value) < this.precision) {
       return;
     }
 
@@ -43,7 +44,7 @@ export default class Inertia {
 
     this.value = lerp(this.value, 0, this.lerpFactor);
 
-    if (Math.abs(this.value) < 0.1) {
+    if (Math.abs(this.value) < this.precision) {
       this.deactivate();
     }
 
