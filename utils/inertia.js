@@ -6,8 +6,8 @@ export default class Inertia {
 
     this.value = null;
 
-    this.lerpFactor = options?.lerpFactor || 0.035;
-    this.precision = options?.precision || 0.1;
+    this.lerpFactor = options.lerpFactor || 0.035;
+    this.precision = options.precision || 0.1;
 
     this.frame = null;
   }

@@ -252,7 +252,7 @@ export default class Scroller {
    * @param {float} scrollPosition
    */
   getOption(key) {
-    return this.options?.[key] || undefined;
+    return this.options[key] || undefined;
   }
 
   /**
@@ -613,7 +613,7 @@ export default class Scroller {
           : this.scrollToTween.getIsRunning()
           ? this.scrollToTween.getDelta()
           : this.delta) *
-          (this.options.scrollFactor?.[this.mode] || 1),
+          (this.options.scrollFactor[this.mode] || 1),
       0,
       this.options.scrollPositionMax
     );
