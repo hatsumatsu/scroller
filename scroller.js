@@ -17,6 +17,10 @@ export default class Scroller {
 
       loop: false,
 
+      autoSpeed: 0,
+
+      eventTarget: window,
+
       scrollPositionMax: Infinity,
 
       scrollToEasing: "outQuart",
@@ -303,10 +307,12 @@ export default class Scroller {
     }
 
     // KEYBOARD
-    document.removeEventListener("keydown", this.onKeyDown);
+    this.options.eventTarget.removeEventListener("keydown", this.onKeyDown);
 
     // MOUSEWHEEL
-    document.removeEventListener("wheel", this.onWheel, { passive: true });
+    this.options.eventTarget.removeEventListener("wheel", this.onWheel, {
+      passive: true,
+    });
 
     // MOUSE
     if (this.elements.scrollBar) {
@@ -319,9 +325,13 @@ export default class Scroller {
     document.removeEventListener("mouseup", this.onMouseUp);
 
     // TOUCH
-    document.removeEventListener("touchstart", this.onTouchStart, {
-      passive: true,
-    });
+    this.options.eventTarget.removeEventListener(
+      "touchstart",
+      this.onTouchStart,
+      {
+        passive: true,
+      }
+    );
     document.removeEventListener("touchmove", this.onTouchMove, {
       passive: false,
     });
@@ -349,12 +359,14 @@ export default class Scroller {
 
     // KEYBOARD
     this.onKeyDown = this.onKeyDown.bind(this);
-    document.addEventListener("keydown", this.onKeyDown);
+    this.options.eventTarget.addEventListener("keydown", this.onKeyDown);
 
     // MOUSEWHEEL
 
     this.onWheel = this.onWheel.bind(this);
-    document.addEventListener("wheel", this.onWheel, { passive: true });
+    this.options.eventTarget.addEventListener("wheel", this.onWheel, {
+      passive: true,
+    });
 
     // MOUSE
     this.onMouseDown = this.onMouseDown.bind(this);
@@ -370,7 +382,7 @@ export default class Scroller {
     this.onTouchStart = this.onTouchStart.bind(this);
     this.onTouchMove = this.onTouchMove.bind(this);
     this.onTouchEnd = this.onTouchEnd.bind(this);
-    document.addEventListener("touchstart", this.onTouchStart, {
+    this.options.eventTarget.addEventListener("touchstart", this.onTouchStart, {
       passive: true,
     });
     document.addEventListener("touchmove", this.onTouchMove, {
@@ -606,14 +618,19 @@ export default class Scroller {
       return;
     }
 
+    let delta =
+      (this.touchInertia.getIsActive()
+        ? this.touchInertia.getValue()
+        : this.scrollToTween.getIsRunning()
+        ? this.scrollToTween.getDelta()
+        : this.delta) * (this.options.scrollFactor[this.mode] || 1);
+
+    if (!delta) {
+      delta = this.options.autoSpeed || 0;
+    }
+
     this.targetScrollPosition = clamp(
-      this.targetScrollPosition +
-        (this.touchInertia.getIsActive()
-          ? this.touchInertia.getValue()
-          : this.scrollToTween.getIsRunning()
-          ? this.scrollToTween.getDelta()
-          : this.delta) *
-          (this.options.scrollFactor[this.mode] || 1),
+      this.targetScrollPosition + delta,
       0,
       this.options.scrollPositionMax
     );
