@@ -332,10 +332,14 @@ export default class Scroller {
         passive: true,
       }
     );
-    document.removeEventListener("touchmove", this.onTouchMove, {
-      passive: false,
-    });
-    document.removeEventListener("touchend", this.onTouchEnd, {
+    this.options.eventTarget.removeEventListener(
+      "touchmove",
+      this.onTouchMove,
+      {
+        passive: false,
+      }
+    );
+    this.options.eventTarget.removeEventListener("touchend", this.onTouchEnd, {
       passive: true,
     });
     document.removeEventListener("touchcancel", this.onTouchEnd, {
@@ -385,10 +389,12 @@ export default class Scroller {
     this.options.eventTarget.addEventListener("touchstart", this.onTouchStart, {
       passive: true,
     });
-    document.addEventListener("touchmove", this.onTouchMove, {
+    this.options.eventTarget.addEventListener("touchmove", this.onTouchMove, {
       passive: false,
     });
-    document.addEventListener("touchend", this.onTouchEnd, { passive: true });
+    this.options.eventTarget.addEventListener("touchend", this.onTouchEnd, {
+      passive: true,
+    });
     document.addEventListener("touchcancel", this.onTouchEnd, {
       passive: true,
     });
