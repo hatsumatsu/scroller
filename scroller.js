@@ -85,6 +85,8 @@ export default class Scroller {
 
     this.scrollProgress = 0;
 
+    this.loopCount = 0;
+
     this.scrollBar = {
       size: 0,
     };
@@ -253,7 +255,15 @@ export default class Scroller {
 
   /**
    * Public method
-   * @param {float} scrollPosition
+   * @returns {int} loopCount
+   */
+  getLoopCount() {
+    return this.loopCount;
+  }
+
+  /**
+   * Public method
+   * @returns {*} option
    */
   getOption(key) {
     return this.options[key] || undefined;
@@ -644,8 +654,10 @@ export default class Scroller {
     if (this.options.loop) {
       if (this.scrollPosition > this.options.scrollPositionMax - 1) {
         this.targetScrollPosition = 1;
+        this.loopCount++;
       } else if (this.scrollPosition < 1) {
         this.targetScrollPosition = this.options.scrollPositionMax - 1;
+        this.loopCount--;
       }
     }
 
