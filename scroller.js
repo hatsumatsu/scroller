@@ -171,7 +171,6 @@ export default class Scroller {
 
   /**
    * Public method
-   * @param {float} scrollPosition
    */
   activate() {
     this.is.active = true;
@@ -182,7 +181,6 @@ export default class Scroller {
 
   /**
    * Public method
-   * @param {float} scrollPosition
    */
   deactivate() {
     this.is.active = false;
@@ -194,6 +192,7 @@ export default class Scroller {
   /**
    * Public method
    * @param {float} scrollPosition
+   * @param {boolean} animate
    */
   scrollTo(scrollPosition, animate = false) {
     if (scrollPosition === undefined) {
@@ -231,7 +230,7 @@ export default class Scroller {
 
   /**
    * Public method
-   * @param {float} scrollPosition
+   * @returns {float} scrollPosition
    */
   getScrollPosition() {
     return this.scrollPosition;
@@ -239,7 +238,7 @@ export default class Scroller {
 
   /**
    * Public method
-   * @param {float} scrollPosition
+   * @returns {float} scrollPositionMax
    */
   getScrollPositionMax() {
     return this.options.scrollPositionMax;
@@ -247,7 +246,7 @@ export default class Scroller {
 
   /**
    * Public method
-   * @param {float} scrollPosition
+   * @returns {float} scrollProgress
    */
   getScrollProgress() {
     return this.scrollProgress;
@@ -271,7 +270,9 @@ export default class Scroller {
 
   /**
    * Public method
-   * @param {float} scrollPosition
+   * @param {string} key
+   * @param {*} value
+   * @param {boolean} update
    */
   setOption(key, value, update = true) {
     // validate
@@ -299,7 +300,6 @@ export default class Scroller {
 
   /**
    * Public method
-   * @param {float} scrollPosition
    */
   destroy() {
     // INERTIA
