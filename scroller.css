@@ -10,7 +10,7 @@
   --scrollbar--opacity: 0.6;
   --scrollbar--opacity--active: 0.9;
 
-  position: fixed;
+  position: absolute;
   z-index: 1000;
 
   margin: 0;

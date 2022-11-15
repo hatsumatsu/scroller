@@ -19,7 +19,7 @@ export default class Scroller {
 
       autoSpeed: 0,
 
-      eventTarget: window,
+      container: window,
 
       scrollPositionMax: Infinity,
 
@@ -57,7 +57,7 @@ export default class Scroller {
       scrollbaring: false,
     };
 
-    this.scrollerSize = 0; // either window.innerHeight or window.innerWidth depending on this.options.direction
+    this.scrollerSize = 0; // either window.innerHeight/innerWidth or this.options.container.offsetHeight/offsetWidth depending on this.options.direction
 
     this.mode = undefined;
 
@@ -130,7 +130,11 @@ export default class Scroller {
       "data-scroller-direction",
       this.options.direction
     );
-    document.body.appendChild(this.elements.scrollBar);
+
+    (this.options.container === window
+      ? document.body
+      : this.options.container
+    ).appendChild(this.elements.scrollBar);
   }
 
   destroyScrollbar() {
@@ -331,10 +335,10 @@ export default class Scroller {
     }
 
     // KEYBOARD
-    this.options.eventTarget.removeEventListener("keydown", this.onKeyDown);
+    this.options.container.removeEventListener("keydown", this.onKeyDown);
 
     // MOUSEWHEEL
-    this.options.eventTarget.removeEventListener("wheel", this.onWheel, {
+    this.options.container.removeEventListener("wheel", this.onWheel, {
       passive: true,
     });
 
@@ -349,21 +353,17 @@ export default class Scroller {
     document.removeEventListener("mouseup", this.onMouseUp);
 
     // TOUCH
-    this.options.eventTarget.removeEventListener(
+    this.options.container.removeEventListener(
       "touchstart",
       this.onTouchStart,
       {
         passive: true,
       }
     );
-    this.options.eventTarget.removeEventListener(
-      "touchmove",
-      this.onTouchMove,
-      {
-        passive: false,
-      }
-    );
-    this.options.eventTarget.removeEventListener("touchend", this.onTouchEnd, {
+    this.options.container.removeEventListener("touchmove", this.onTouchMove, {
+      passive: false,
+    });
+    this.options.container.removeEventListener("touchend", this.onTouchEnd, {
       passive: true,
     });
     document.removeEventListener("touchcancel", this.onTouchEnd, {
@@ -387,12 +387,12 @@ export default class Scroller {
 
     // KEYBOARD
     this.onKeyDown = this.onKeyDown.bind(this);
-    this.options.eventTarget.addEventListener("keydown", this.onKeyDown);
+    this.options.container.addEventListener("keydown", this.onKeyDown);
 
     // MOUSEWHEEL
 
     this.onWheel = this.onWheel.bind(this);
-    this.options.eventTarget.addEventListener("wheel", this.onWheel, {
+    this.options.container.addEventListener("wheel", this.onWheel, {
       passive: true,
     });
 
@@ -410,13 +410,13 @@ export default class Scroller {
     this.onTouchStart = this.onTouchStart.bind(this);
     this.onTouchMove = this.onTouchMove.bind(this);
     this.onTouchEnd = this.onTouchEnd.bind(this);
-    this.options.eventTarget.addEventListener("touchstart", this.onTouchStart, {
+    this.options.container.addEventListener("touchstart", this.onTouchStart, {
       passive: true,
     });
-    this.options.eventTarget.addEventListener("touchmove", this.onTouchMove, {
+    this.options.container.addEventListener("touchmove", this.onTouchMove, {
       passive: false,
     });
-    this.options.eventTarget.addEventListener("touchend", this.onTouchEnd, {
+    this.options.container.addEventListener("touchend", this.onTouchEnd, {
       passive: true,
     });
     document.addEventListener("touchcancel", this.onTouchEnd, {
@@ -439,7 +439,13 @@ export default class Scroller {
 
   resize() {
     this.scrollerSize =
-      this.options.direction === "y" ? window.innerHeight : window.innerWidth;
+      this.options.direction === "y"
+        ? this.options.container[
+            this.options.container === window ? "innerHeight" : "offsetHeight"
+          ]
+        : this.options.container[
+            this.options.container === window ? "innerWidth" : "offsetWidth"
+          ];
 
     // modify the scrollbar size to allow scrolling in small virtual viewports
     if (this.options.scrollPositionMax) {
