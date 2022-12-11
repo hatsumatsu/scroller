@@ -208,7 +208,6 @@ export default class Scroller {
     }
 
     // if looped and animated, check if the way forward is shorter than backwards
-    // TODO: do  the same backwards
     if (this.options.loop && animate) {
       if (
         Math.abs(
@@ -218,6 +217,14 @@ export default class Scroller {
         ) < Math.abs(scrollPosition - this.targetScrollPosition)
       ) {
         scrollPosition = scrollPosition + this.options.scrollPositionMax;
+      } else if (
+        Math.abs(
+          scrollPosition -
+            this.targetScrollPosition -
+            this.options.scrollPositionMax
+        ) < Math.abs(scrollPosition - this.targetScrollPosition)
+      ) {
+        scrollPosition = scrollPosition - this.options.scrollPositionMax;
       }
     }
 
@@ -670,7 +677,7 @@ export default class Scroller {
       (this.touchInertia.getIsActive()
         ? this.touchInertia.getValue()
         : this.scrollToTween.getIsRunning()
-        ? this.scrollToTween.getDelta() % this.options.scrollPositionMax // use only the remainder in case we are scrolling forwards through the loop
+        ? this.scrollToTween.getDelta() % this.options.scrollPositionMax // use only the remainder in case we are scrolling forwards(backwards) through the loop boundaries
         : this.delta) * (this.options.scrollFactor[this.mode] || 1);
 
     if (!delta) {
