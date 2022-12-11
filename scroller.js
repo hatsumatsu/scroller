@@ -335,7 +335,7 @@ export default class Scroller {
     }
 
     // KEYBOARD
-    this.options.container.removeEventListener("keydown", this.onKeyDown);
+    window.removeEventListener("keydown", this.onKeyDown);
 
     // MOUSEWHEEL
     this.options.container.removeEventListener("wheel", this.onWheel, {
@@ -387,7 +387,7 @@ export default class Scroller {
 
     // KEYBOARD
     this.onKeyDown = this.onKeyDown.bind(this);
-    this.options.container.addEventListener("keydown", this.onKeyDown);
+    window.addEventListener("keydown", this.onKeyDown);
 
     // MOUSEWHEEL
 
@@ -480,14 +480,26 @@ export default class Scroller {
       return;
     }
 
-    this.scrollToTween.stop();
+    if (this.options.direction === "x") {
+      if (event.keyCode === 39) {
+        this.scrollToTween.stop();
+        this.delta += this.options.keyboard.distance * this.scrollerSize;
+      }
 
-    if (event.keyCode === 32 || event.keyCode === 40) {
-      this.delta += this.options.keyboard.distance * this.scrollerSize;
-    }
+      if (event.keyCode === 37) {
+        this.scrollToTween.stop();
+        this.delta += -1 * this.options.keyboard.distance * this.scrollerSize;
+      }
+    } else {
+      if (event.keyCode === 32 || event.keyCode === 40) {
+        this.scrollToTween.stop();
+        this.delta += this.options.keyboard.distance * this.scrollerSize;
+      }
 
-    if (event.keyCode === 38) {
-      this.delta += -1 * this.options.keyboard.distance * this.scrollerSize;
+      if (event.keyCode === 38) {
+        this.scrollToTween.stop();
+        this.delta += -1 * this.options.keyboard.distance * this.scrollerSize;
+      }
     }
   }
 
