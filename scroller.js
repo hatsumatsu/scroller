@@ -55,6 +55,7 @@ export default class Scroller {
       initiated: false,
       active: false,
       scrollbaring: false,
+      mouseover: false,
     };
 
     this.scrollerSize = 0; // either window.innerHeight/innerWidth or this.options.container.offsetHeight/offsetWidth depending on this.options.direction
@@ -212,7 +213,7 @@ export default class Scroller {
     if (this.options.loop) {
       if (
         Math.abs(
-            scrollPosition -
+          scrollPosition -
             this.targetScrollPosition +
             this.options.scrollPositionMax
         ) < Math.abs(scrollPosition - this.targetScrollPosition)
@@ -351,6 +352,9 @@ export default class Scroller {
     });
 
     // MOUSE
+    this.options.container.removeEventListener("mouseenter", this.onMouseEnter);
+    this.options.container.removeEventListener("mouseleave", this.onMouseLeave);
+
     if (this.elements.scrollBar) {
       this.elements.scrollBar.removeEventListener(
         "mousedown",
@@ -405,12 +409,16 @@ export default class Scroller {
     });
 
     // MOUSE
+    this.onMouseEnter = this.onMouseEnter.bind(this);
+    this.onMouseLeave = this.onMouseLeave.bind(this);
     this.onMouseDown = this.onMouseDown.bind(this);
     this.onMouseMove = this.onMouseMove.bind(this);
     this.onMouseUp = this.onMouseUp.bind(this);
     if (this.elements.scrollBar) {
       this.elements.scrollBar.addEventListener("mousedown", this.onMouseDown);
     }
+    this.options.container.addEventListener("mouseenter", this.onMouseEnter);
+    this.options.container.addEventListener("mouseleave", this.onMouseLeave);
     document.addEventListener("mousemove", this.onMouseMove);
     document.addEventListener("mouseup", this.onMouseUp);
 
@@ -488,8 +496,23 @@ export default class Scroller {
       return;
     }
 
+    console.log(
+      document.activeElement,
+      this.options.container === document.activeElement,
+      this.options.container.contains(document.activeElement)
+    );
+
+    if (
+      this.options.container !== window &&
+      this.options.container !== document.activeElement &&
+      !this.options.container.contains(document.activeElement) &&
+      !this.is.mouseover
+    ) {
+      return;
+    }
+
     if (this.options.direction === "x") {
-      if (event.keyCode === 39) {
+      if (event.keyCode === 39 || event.keyCode === 32) {
         this.scrollToTween.stop();
         this.delta += this.options.keyboard.distance * this.scrollerSize;
       }
@@ -499,7 +522,7 @@ export default class Scroller {
         this.delta += -1 * this.options.keyboard.distance * this.scrollerSize;
       }
     } else {
-      if (event.keyCode === 32 || event.keyCode === 40) {
+      if (event.keyCode === 40 || event.keyCode === 32) {
         this.scrollToTween.stop();
         this.delta += this.options.keyboard.distance * this.scrollerSize;
       }
@@ -602,6 +625,25 @@ export default class Scroller {
   }
 
   /**
+   * MOUSE ENTER
+   */
+  onMouseEnter(event) {
+    if (!this.is.active) {
+      return;
+    }
+
+    this.is.mouseover = true;
+  }
+
+  onMouseLeave(event) {
+    if (!this.is.active) {
+      return;
+    }
+
+    this.is.mouseover = false;
+  }
+
+  /**
    * MOUSE ON SCROLLBAR
    */
   onMouseDown(event) {
@@ -678,7 +720,7 @@ export default class Scroller {
       (this.touchInertia.getIsActive()
         ? this.touchInertia.getValue()
         : this.scrollToTween.getIsRunning()
-        ? this.scrollToTween.getDelta() % this.options.scrollPositionMax // use only the remainder in case we are scrolling forwards(backwards) through the loop boundaries
+        ? this.scrollToTween.getDelta() % this.options.scrollPositionMax // use only the remainder in case we are scrolling forwards/backwards through the loop boundaries
         : this.delta) * (this.options.scrollFactor[this.mode] || 1);
 
     if (!delta) {
