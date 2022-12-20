@@ -207,13 +207,14 @@ export default class Scroller {
       this.scrollToTween.stop();
     }
 
-    // if looped and animated, check if the way forward is shorter than backwards
-    if (this.options.loop && animate) {
+    // if looped, check if the way forward is shorter than backwards
+    // TODO: do  the same backwards
+    if (this.options.loop) {
       if (
         Math.abs(
-          this.options.scrollPositionMax +
             scrollPosition -
-            this.targetScrollPosition
+            this.targetScrollPosition +
+            this.options.scrollPositionMax
         ) < Math.abs(scrollPosition - this.targetScrollPosition)
       ) {
         scrollPosition = scrollPosition + this.options.scrollPositionMax;
