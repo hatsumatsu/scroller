@@ -496,16 +496,10 @@ export default class Scroller {
       return;
     }
 
-    console.log(
-      document.activeElement,
-      this.options.container === document.activeElement,
-      this.options.container.contains(document.activeElement)
-    );
-
     if (
       this.options.container !== window &&
       this.options.container !== document.activeElement &&
-      !this.options.container.contains(document.activeElement) &&
+      (this.options.container.contains && !this.options.container.contains(document.activeElement)) &&
       !this.is.mouseover
     ) {
       return;
