@@ -488,7 +488,7 @@ export default class Scroller {
    * KEYBOARD
    */
   onKeyDown(event) {
-    if (!this.options.active) {
+    if (!this.is.active) {
       return;
     }
 
@@ -532,7 +532,7 @@ export default class Scroller {
    * MOUSEWHEEL
    */
   onWheel(event) {
-    if (!this.options.active) {
+    if (!this.is.active) {
       return;
     }
 
@@ -558,7 +558,7 @@ export default class Scroller {
    * TOUCH
    */
   onTouchStart(event) {
-    if (!this.options.active) {
+    if (!this.is.active) {
       return;
     }
 
