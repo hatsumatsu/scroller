@@ -475,12 +475,14 @@ export default class Scroller {
       this.scrollBar.size = 0;
     }
 
-    if (this.options.direction === "y") {
-      this.elements.scrollBar.style.width = ``;
-      this.elements.scrollBar.style.height = this.scrollBar.size + "px";
-    } else {
-      this.elements.scrollBar.style.width = this.scrollBar.size + "px";
-      this.elements.scrollBar.style.height = ``;
+    if (this.elements.scrollBar) {
+      if (this.options.direction === "y") {
+        this.elements.scrollBar.style.width = ``;
+        this.elements.scrollBar.style.height = this.scrollBar.size + "px";
+      } else {
+        this.elements.scrollBar.style.width = this.scrollBar.size + "px";
+        this.elements.scrollBar.style.height = ``;
+      }
     }
   }
 
