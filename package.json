@@ -1,6 +1,6 @@
 {
   "name": "@superstructure.net/scroller",
-  "version": "0.0.19",
+  "version": "0.0.20",
   "description": "Virtual Scroll",
   "main": "scroller.js",
   "type": "module",

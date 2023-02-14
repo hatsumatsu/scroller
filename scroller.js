@@ -167,10 +167,14 @@ export default class Scroller {
   }
 
   showScrollBar() {
+    if (!this.elements.scrollBar) return;
+
     this.elements.scrollBar.classList.remove("hidden");
   }
 
   hideScrollBar() {
+    if (!this.elements.scrollBar) return;
+
     this.elements.scrollBar.classList.add("hidden");
   }
 
@@ -657,7 +661,9 @@ export default class Scroller {
     this.mousePosition.previous =
       this.options.direction === "y" ? event.clientY : event.clientX;
 
-    this.elements.scrollBar.classList.add("active");
+    if (this.elements.scrollBar) {
+      this.elements.scrollBar.classList.add("active");
+    }
   }
 
   onMouseMove(event) {
@@ -697,7 +703,9 @@ export default class Scroller {
 
     this.is.scrollbaring = false;
 
-    this.elements.scrollBar.classList.remove("active");
+    if (this.elements.scrollBar) {
+      this.elements.scrollBar.classList.remove("active");
+    }
   }
 
   /**
