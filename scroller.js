@@ -69,6 +69,17 @@ export default class Scroller {
       previous: 0,
     };
 
+    this.touch = {
+      current: {
+        x: 0, 
+        y: 0
+      },
+      previous: { 
+        x: 0, 
+        y: 0
+      },
+    }
+
     this.mousePosition = {
       current: 0,
       previous: 0,
@@ -578,6 +589,12 @@ export default class Scroller {
     this.touchInertia.deactivate();
     this.scrollToTween.stop();
 
+    this.touch.previous = this.touch.current;
+    this.touch.current = { 
+      x: event.touches[0].clientX
+      y: event.touches[0].clientY
+    }
+
     this.touchPosition.previous =
       this.options.direction === "y"
         ? event.touches[0].clientY
@@ -596,6 +613,19 @@ export default class Scroller {
 
     if (!this.options.passiveTouchMoveEvent) {
       event.preventDefault();
+    }
+
+    this.touch.previous = this.touch.current;
+    this.touch.current = { 
+      x: event.touches[0].clientX
+      y: event.touches[0].clientY
+    }    
+
+    if( 
+      ( this.options.direction === 'x' && Math.abs( touch.current.y - touch.previous.y ) > Math.abs( touch.current.x - touch.previous.x ) ) ||
+      ( this.options.direction === 'y' && Math.abs( touch.current.x - touch.previous.x ) > Math.abs( touch.current.y - touch.previous.y ) ) 
+      ) {
+      return;
     }
 
     this.touchInertia.deactivate();
