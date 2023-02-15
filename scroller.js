@@ -436,7 +436,7 @@ export default class Scroller {
       passive: true,
     });
     this.options.container.addEventListener("touchmove", this.onTouchMove, {
-      passive: passiveTouchMoveEvent,
+      passive: this.options.passiveTouchMoveEvent,
     });
     this.options.container.addEventListener("touchend", this.onTouchEnd, {
       passive: true,
