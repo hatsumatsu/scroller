@@ -624,11 +624,11 @@ export default class Scroller {
 
     if (
       (this.options.direction === "x" &&
-        Math.abs(touch.current.y - touch.previous.y) >
-          Math.abs(touch.current.x - touch.previous.x)) ||
+        Math.abs(this.touch.current.y - this.touch.previous.y) >
+          Math.abs(this.touch.current.x - this.touch.previous.x)) ||
       (this.options.direction === "y" &&
-        Math.abs(touch.current.x - touch.previous.x) >
-          Math.abs(touch.current.y - touch.previous.y))
+        Math.abs(this.touch.current.x - this.touch.previous.x) >
+          Math.abs(this.touch.current.y - this.touch.previous.y))
     ) {
       return;
     }
