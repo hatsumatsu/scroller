@@ -36,13 +36,13 @@ export default class Scroller {
 
       bindResize: true,
 
-/**
- * For greater compatibility the touchmove event is not passive but calls preventDefault().
- * (For example, check this bug on throttled touchmove events in Chrome Android 85.* https://crbug.com/1123304)
- * 
- * Set to true to mak events passive and skip preventDefault().
- */
-      passiveTouchMoveEvent: false,      
+      /**
+       * For greater compatibility the touchmove event is not passive but calls preventDefault().
+       * (For example, check this bug on throttled touchmove events in Chrome Android 85.* https://crbug.com/1123304)
+       *
+       * Set to true to mak events passive and skip preventDefault().
+       */
+      passiveTouchMoveEvent: false,
 
       onScroll: () => {},
     };
@@ -71,14 +71,14 @@ export default class Scroller {
 
     this.touch = {
       current: {
-        x: 0, 
-        y: 0
+        x: 0,
+        y: 0,
       },
-      previous: { 
-        x: 0, 
-        y: 0
+      previous: {
+        x: 0,
+        y: 0,
       },
-    }
+    };
 
     this.mousePosition = {
       current: 0,
@@ -518,7 +518,8 @@ export default class Scroller {
     if (
       this.options.container !== window &&
       this.options.container !== document.activeElement &&
-      (this.options.container.contains && !this.options.container.contains(document.activeElement)) &&
+      this.options.container.contains &&
+      !this.options.container.contains(document.activeElement) &&
       !this.is.mouseover
     ) {
       return;
@@ -590,10 +591,10 @@ export default class Scroller {
     this.scrollToTween.stop();
 
     this.touch.previous = this.touch.current;
-    this.touch.current = { 
-      x: event.touches[0].clientX
-      y: event.touches[0].clientY
-    }
+    this.touch.current = {
+      x: event.touches[0].clientX,
+      y: event.touches[0].clientY,
+    };
 
     this.touchPosition.previous =
       this.options.direction === "y"
@@ -616,15 +617,19 @@ export default class Scroller {
     }
 
     this.touch.previous = this.touch.current;
-    this.touch.current = { 
-      x: event.touches[0].clientX
-      y: event.touches[0].clientY
-    }    
+    this.touch.current = {
+      x: event.touches[0].clientX,
+      y: event.touches[0].clientY,
+    };
 
-    if( 
-      ( this.options.direction === 'x' && Math.abs( touch.current.y - touch.previous.y ) > Math.abs( touch.current.x - touch.previous.x ) ) ||
-      ( this.options.direction === 'y' && Math.abs( touch.current.x - touch.previous.x ) > Math.abs( touch.current.y - touch.previous.y ) ) 
-      ) {
+    if (
+      (this.options.direction === "x" &&
+        Math.abs(touch.current.y - touch.previous.y) >
+          Math.abs(touch.current.x - touch.previous.x)) ||
+      (this.options.direction === "y" &&
+        Math.abs(touch.current.x - touch.previous.x) >
+          Math.abs(touch.current.y - touch.previous.y))
+    ) {
       return;
     }
 
