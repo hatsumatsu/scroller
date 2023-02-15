@@ -1,9 +1,3 @@
-/**
- * For background on throttling of touchmove events on Chrome Android 85.* see
- * https://crbug.com/1123304
- *
- * once this is fixed we can make touchstart, touchmove and touchend passive again without calling event.preventDefault();
- */
 import Tween from "./utils/tween.js";
 import Inertia from "./utils/inertia.js";
 import { clamp } from "./utils/utils.js";
@@ -40,9 +34,17 @@ export default class Scroller {
         minSize: 40,
       },
 
-      onScroll: () => {},
-
       bindResize: true,
+
+/**
+ * For greater compatibility the touchmove event is not passive but calls preventDefault().
+ * (For example, check this bug on throttled touchmove events in Chrome Android 85.* https://crbug.com/1123304)
+ * 
+ * Set to true to mak events passive and skip preventDefault().
+ */
+      passiveTouchMoveEvent: false,      
+
+      onScroll: () => {},
     };
 
     this.options = Object.assign({}, this.defaults, options);
@@ -377,7 +379,7 @@ export default class Scroller {
       }
     );
     this.options.container.removeEventListener("touchmove", this.onTouchMove, {
-      passive: false,
+      passive: this.options.passiveTouchMoveEvent,
     });
     this.options.container.removeEventListener("touchend", this.onTouchEnd, {
       passive: true,
@@ -434,7 +436,7 @@ export default class Scroller {
       passive: true,
     });
     this.options.container.addEventListener("touchmove", this.onTouchMove, {
-      passive: false,
+      passive: passiveTouchMoveEvent,
     });
     this.options.container.addEventListener("touchend", this.onTouchEnd, {
       passive: true,
@@ -592,8 +594,9 @@ export default class Scroller {
       return;
     }
 
-    // preventDefault since the event is NOT passive
-    event.preventDefault();
+    if (!this.options.passiveTouchMoveEvent) {
+      event.preventDefault();
+    }
 
     this.touchInertia.deactivate();
     this.scrollToTween.stop();
