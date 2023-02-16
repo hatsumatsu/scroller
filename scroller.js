@@ -58,16 +58,12 @@ export default class Scroller {
       active: false,
       scrollbaring: false,
       mouseover: false,
+      autoscrolling: this.options.autoSpeed ? true : false,
     };
 
     this.scrollerSize = 0; // either window.innerHeight/innerWidth or this.options.container.offsetHeight/offsetWidth depending on this.options.direction
 
     this.mode = undefined;
-
-    this.touchPosition = {
-      current: 0,
-      previous: 0,
-    };
 
     this.touch = {
       current: {
@@ -108,6 +104,7 @@ export default class Scroller {
     this.debouncer = {
       resize: null,
       wheel: null,
+      input: null,
     };
 
     this.init();
@@ -337,6 +334,10 @@ export default class Scroller {
       }
     }
 
+    if (key === "autoSpeed") {
+      this.is.autoscrolling = value ? true : false;
+    }
+
     this.resize();
 
     this.updateScrollBar();
@@ -405,6 +406,21 @@ export default class Scroller {
     // STATE
     document.documentElement.setAttribute("data-Scroller-initiated", false);
     this.is.initiated = false;
+
+    // timeouts
+    if (this.debouncer.resize) clearTimeout(this.debouncer.resize);
+    if (this.debouncer.wheel) clearTimeout(this.debouncer.wheel);
+    if (this.debouncer.input) clearTimeout(this.debouncer.input);
+  }
+
+  debounceAutoScroll() {
+    if (!this.options.autoSpeed) return;
+    this.is.autoscrolling = false;
+
+    clearTimeout(this.debouncer.input);
+    this.debouncer.input = setTimeout(() => {
+      this.is.autoscrolling = true;
+    }, 2000);
   }
 
   bindEvents() {
@@ -464,7 +480,6 @@ export default class Scroller {
     this.scrollToTween.stop();
 
     clearTimeout(this.debouncer.resize);
-
     this.debouncer.resize = setTimeout(() => {
       this.resize();
     }, 500);
@@ -525,6 +540,8 @@ export default class Scroller {
       return;
     }
 
+    this.debounceAutoScroll();
+
     if (this.options.direction === "x") {
       if (event.keyCode === 39 || event.keyCode === 32) {
         this.scrollToTween.stop();
@@ -556,6 +573,8 @@ export default class Scroller {
       return;
     }
 
+    this.debounceAutoScroll();
+
     this.scrollToTween.stop();
 
     this.mode = "wheel";
@@ -582,6 +601,8 @@ export default class Scroller {
       return;
     }
 
+    this.debounceAutoScroll();
+
     // No preventDefault since the event is passive
     // event.preventDefault();
 
@@ -590,21 +611,10 @@ export default class Scroller {
     this.touchInertia.deactivate();
     this.scrollToTween.stop();
 
-    this.touch.previous = this.touch.current;
-    this.touch.current = {
+    this.touch.previous = this.touch.current = {
       x: event.touches[0].clientX,
       y: event.touches[0].clientY,
     };
-
-    this.touchPosition.previous =
-      this.options.direction === "y"
-        ? event.touches[0].clientY
-        : event.touches[0].clientX;
-
-    this.touchPosition.current =
-      this.options.direction === "y"
-        ? event.touches[0].clientY
-        : event.touches[0].clientX;
   }
 
   onTouchMove(event) {
@@ -616,34 +626,19 @@ export default class Scroller {
       event.preventDefault();
     }
 
+    this.touchInertia.deactivate();
+    this.scrollToTween.stop();
+    this.debounceAutoScroll();
+
     this.touch.previous = this.touch.current;
     this.touch.current = {
       x: event.touches[0].clientX,
       y: event.touches[0].clientY,
     };
 
-    if (
-      (this.options.direction === "x" &&
-        Math.abs(this.touch.current.y - this.touch.previous.y) >
-          Math.abs(this.touch.current.x - this.touch.previous.x)) ||
-      (this.options.direction === "y" &&
-        Math.abs(this.touch.current.x - this.touch.previous.x) >
-          Math.abs(this.touch.current.y - this.touch.previous.y))
-    ) {
-      return;
-    }
-
-    this.touchInertia.deactivate();
-    this.scrollToTween.stop();
-
-    this.touchPosition.previous = this.touchPosition.current;
-
-    this.touchPosition.current =
-      this.options.direction === "y"
-        ? event.touches[0].clientY
-        : event.touches[0].clientX;
-
-    const delta = this.touchPosition.current - this.touchPosition.previous;
+    const delta =
+      this.touch.current[this.options.direction] -
+      this.touch.previous[this.options.direction];
 
     this.delta += -1 * delta;
 
@@ -763,10 +758,10 @@ export default class Scroller {
         ? this.touchInertia.getValue()
         : this.scrollToTween.getIsRunning()
         ? this.scrollToTween.getDelta() % this.options.scrollPositionMax // use only the remainder in case we are scrolling forwards/backwards through the loop boundaries
-        : this.delta) * (this.options.scrollFactor[this.mode] || 1);
+        : this.delta) * (this.options.scrollFactor[this.mode] || 1) || 0;
 
-    if (!delta) {
-      delta = this.options.autoSpeed || 0;
+    if (!delta && this.options.autoSpeed && this.is.autoscrolling) {
+      delta = this.options.autoSpeed;
     }
 
     this.targetScrollPosition = clamp(
