@@ -15,6 +15,8 @@ export default class Scroller {
 
       container: window,
 
+      scrollBar: true,
+
       scrollPositionMax: Infinity,
 
       scrollToEasing: "outQuart",
@@ -134,6 +136,8 @@ export default class Scroller {
   }
 
   buildScrollbar() {
+    if (!this.options.scrollBar) return;
+
     // scrollBar
     this.elements.scrollBar = document.createElement("div");
     this.elements.scrollBar.setAttribute("data-scroller-role", "scrollBar");
