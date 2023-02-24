@@ -11,6 +11,8 @@ export default class Scroller {
 
       loop: false,
 
+      animationLoop: true,
+
       autoSpeed: 0,
 
       container: window,
@@ -199,7 +201,10 @@ export default class Scroller {
     this.is.active = true;
 
     this.showScrollBar();
-    this.onFrame();
+
+    if (this.options.animationLoop) {
+      this.onFrame();
+    }
   }
 
   /**
@@ -789,8 +794,11 @@ export default class Scroller {
     this.delta = 0;
 
     cancelAnimationFrame(this.frame);
-    this.frame = requestAnimationFrame((time) => {
-      this.onFrame(time);
-    });
+
+    if (this.options.animationLoop) {
+      this.frame = requestAnimationFrame((time) => {
+        this.onFrame(time);
+      });
+    }
   }
 }
