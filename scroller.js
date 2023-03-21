@@ -377,7 +377,7 @@ export default class Scroller {
 
     // MOUSEWHEEL
     this.options.container.removeEventListener("wheel", this.onWheel, {
-      passive: true,
+      passive: false,
     });
 
     // MOUSE
@@ -449,7 +449,7 @@ export default class Scroller {
 
     this.onWheel = this.onWheel.bind(this);
     this.options.container.addEventListener("wheel", this.onWheel, {
-      passive: true,
+      passive: false,
     });
 
     // MOUSE
@@ -583,6 +583,9 @@ export default class Scroller {
     if (!this.is.active) {
       return;
     }
+
+    event.preventDefault();
+    event.stopPropagation();
 
     this.debounceAutoScroll();
 
