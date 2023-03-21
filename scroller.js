@@ -28,6 +28,8 @@ export default class Scroller {
         wheel: 1,
       },
 
+      dualWheelMode: false,
+
       touchInertiaStrength: 0.035,
 
       keyboard: {
@@ -588,7 +590,13 @@ export default class Scroller {
 
     this.mode = "wheel";
 
-    const delta = this.options.direction === "y" ? event.deltaY : event.deltaX;
+    const delta = this.options.dualWheelMode
+      ? Math.abs(event.deltaX) > Math.abs(event.deltaY)
+        ? event.deltaX
+        : event.deltaY
+      : this.options.direction === "y"
+      ? event.deltaY
+      : event.deltaX;
 
     this.delta += 1 * delta;
 
