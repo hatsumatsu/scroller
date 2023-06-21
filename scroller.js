@@ -13,7 +13,8 @@ export default class Scroller {
 
       animationLoop: true,
 
-      autoSpeed: 0,
+      autoScrollSpeed: 0,
+      autoScrollDelay: 2000,
 
       container: window,
 
@@ -64,7 +65,7 @@ export default class Scroller {
       active: false,
       scrollbaring: false,
       mouseover: false,
-      autoscrolling: this.options.autoSpeed ? true : false,
+      autoscrolling: this.options.autoScrollSpeed ? true : false,
     };
 
     this.scrollerSize = 0; // either window.innerHeight/innerWidth or this.options.container.offsetHeight/offsetWidth depending on this.options.direction
@@ -345,7 +346,7 @@ export default class Scroller {
       }
     }
 
-    if (key === "autoSpeed") {
+    if (key === "autoScrollSpeed") {
       this.is.autoscrolling = value ? true : false;
     }
 
@@ -425,13 +426,13 @@ export default class Scroller {
   }
 
   debounceAutoScroll() {
-    if (!this.options.autoSpeed) return;
+    if (!this.options.autoScrollSpeed) return;
     this.is.autoscrolling = false;
 
     clearTimeout(this.debouncer.input);
     this.debouncer.input = setTimeout(() => {
       this.is.autoscrolling = true;
-    }, 2000);
+    }, this.options.autoScrollDelay);
   }
 
   bindEvents() {
@@ -780,8 +781,8 @@ export default class Scroller {
         ? this.scrollToTween.getDelta() % this.options.scrollPositionMax // use only the remainder in case we are scrolling forwards/backwards through the loop boundaries
         : this.delta) * (this.options.scrollFactor[this.mode] || 1) || 0;
 
-    if (!delta && this.options.autoSpeed && this.is.autoscrolling) {
-      delta = this.options.autoSpeed;
+    if (!delta && this.options.autoScrollSpeed && this.is.autoscrolling) {
+      delta = this.options.autoScrollSpeed;
     }
 
     this.targetScrollPosition = clamp(
