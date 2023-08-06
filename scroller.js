@@ -59,6 +59,7 @@ export default class Scroller {
     this.elements = {};
 
     this.frame = null;
+    this.frameTime = null;
 
     this.is = {
       initiated: false,
@@ -766,6 +767,9 @@ export default class Scroller {
    * FRAME LOOP
    */
   onFrame(time) {
+    const deltaTime = this.frameTime ? time - this.frameTime : 0;
+    this.frameTime = time;
+
     if (!this.is.initiated) {
       return;
     }
@@ -782,7 +786,7 @@ export default class Scroller {
         : this.delta) * (this.options.scrollFactor[this.mode] || 1) || 0;
 
     if (!delta && this.options.autoScrollSpeed && this.is.autoscrolling) {
-      delta = this.options.autoScrollSpeed;
+      delta = this.options.autoScrollSpeed * (deltaTime / 16); // make autoScrollSpeed frame rate-independent by normalizing for 16ms frames
     }
 
     this.targetScrollPosition = clamp(
